@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Ability = require('../models/Ability');
+const auth = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   try {
@@ -58,7 +59,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const ability = new Ability(req.body);
     const saved = await ability.save();
@@ -68,7 +69,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
   try {
     const ability = await Ability.findById(req.params.id);
     if (!ability) return res.status(404).json({ message: 'Not found' });
@@ -81,7 +82,7 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
   try {
     await Ability.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });

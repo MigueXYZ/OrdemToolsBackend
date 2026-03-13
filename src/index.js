@@ -20,6 +20,8 @@ const itemRoutes = require('./routes/items');
 const classRoutes = require('./routes/classes');
 const trackRoutes = require('./routes/tracks');
 const weaponRoutes = require('./routes/weapons');
+const authRoutes = require('./routes/auth');
+const threatRoutes = require('./routes/threats');
 
 app.use('/api/abilities', abilityRoutes);
 app.use('/api/rituals', ritualRoutes);
@@ -29,7 +31,8 @@ app.use('/api/search', searchRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/tracks', trackRoutes);
 app.use('/api/weapons', weaponRoutes);
-app.use('/api/threats', require('./routes/threats'));
+app.use('/api/threats', threatRoutes);
+app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Ordem Biblioteca API' });

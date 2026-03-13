@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Track = require('../models/Track');
+const auth = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   try {
@@ -47,7 +48,7 @@ router.get('/meta', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const newTrack = new Track(req.body);
     await newTrack.save();

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Threat = require('../models/Threat');
+const auth = require('../middleware/auth');
 
 // Obter lista de ameaças com paginação e filtros
 router.get('/', async (req, res) => {
@@ -84,7 +85,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Criar nova ameaça
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const newThreat = new Threat(req.body);
     await newThreat.save();
@@ -95,7 +96,7 @@ router.post('/', async (req, res) => {
 });
 
 // Atualizar ameaça existente
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
   try {
     req.body.updatedAt = Date.now();
     const threat = await Threat.findByIdAndUpdate(req.params.id, req.body, { new: true });

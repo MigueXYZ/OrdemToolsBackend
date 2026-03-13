@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Weapon = require('../models/Weapon');
+const auth = require('../middleware/auth');
 
 router.get('/', async (req, res) => {
   try {
@@ -57,7 +58,7 @@ router.get('/meta', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const newWeapon = new Weapon(req.body);
     await newWeapon.save();
@@ -67,7 +68,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', auth, async (req, res) => {
   try {
     const weapon = await Weapon.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!weapon) {

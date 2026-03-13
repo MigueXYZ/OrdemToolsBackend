@@ -7,6 +7,7 @@ const Item = require('../models/Item');
 const Class = require('../models/Class');
 const Track = require('../models/Track');
 const Weapon = require('../models/Weapon');
+const Threat = require('../models/Threat'); // Ameaças adicionadas
 
 // escape a string for use in a regex
 function escapeRegex(str) {
@@ -16,7 +17,7 @@ function escapeRegex(str) {
 // helper to fetch distinct tags across all collections
 async function getTags(prefix) {
   const regex = new RegExp(`^${escapeRegex(prefix)}`, 'i');
-  const [abilityTags, ritualTags, ruleTags, itemTags, classTags, trackTags, weaponTags] = await Promise.all([
+  const [abilityTags, ritualTags, ruleTags, itemTags, classTags, trackTags, weaponTags, threatTags] = await Promise.all([
     Ability.distinct('tags', { tags: regex }),
     Ritual.distinct('tags', { tags: regex }),
     Rule.distinct('tags', { tags: regex }),
@@ -24,8 +25,9 @@ async function getTags(prefix) {
     Class.distinct('tags', { tags: regex }),
     Track.distinct('tags', { tags: regex }),
     Weapon.distinct('tags', { tags: regex }),
+    Threat.distinct('tags', { tags: regex }) // Tags das ameaças incluídas
   ]);
-  return Array.from(new Set([...abilityTags, ...ritualTags, ...ruleTags, ...itemTags, ...classTags, ...trackTags, ...weaponTags]));
+  return Array.from(new Set([...abilityTags, ...ritualTags, ...ruleTags, ...itemTags, ...classTags, ...trackTags, ...weaponTags, ...threatTags]));
 }
 
 router.get('/', async (req, res) => {
@@ -50,7 +52,7 @@ router.get('/', async (req, res) => {
 
     const searchOptions = { $text: { $search: textSearchString } };
 
-    let results = { abilities: [], rituals: [], rules: [], items: [], classes: [], tracks: [], weapons: [] };
+    let results = { abilities: [], rituals: [], rules: [], items: [], classes: [], tracks: [], weapons: [], threats: [] };
 
     // if a multi-word query is used we already wrapped it as a phrase above.
     // we also always OR with an exact tag match so that searching for a specific tag
@@ -107,6 +109,11 @@ router.get('/', async (req, res) => {
       results.weapons = await Weapon.find(q).limit(limit);
     }
 
+    if (!type || type === 'threats') {
+      const q = onlyByTag ? tagFilter : { $or: [searchOptions, tagFilter] };
+      results.threats = await Threat.find(q).limit(limit);
+    }
+
     res.json({
       query,
       results,
@@ -118,7 +125,8 @@ router.get('/', async (req, res) => {
         classes: results.classes.length,
         tracks: results.tracks.length,
         weapons: results.weapons.length,
-        total: results.abilities.length + results.rituals.length + results.rules.length + results.items.length + results.classes.length + results.tracks.length + results.weapons.length
+        threats: results.threats.length,
+        total: results.abilities.length + results.rituals.length + results.rules.length + results.items.length + results.classes.length + results.tracks.length + results.weapons.length + results.threats.length
       }
     });
   } catch (error) {
