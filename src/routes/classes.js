@@ -34,7 +34,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// return distinct books for UI filters
 router.get('/meta', async (req, res) => {
   try {
     const books = await Class.distinct('book');
@@ -51,6 +50,30 @@ router.post('/', auth, async (req, res) => {
     res.status(201).json(newClass);
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+router.patch('/:id', auth, async (req, res) => {
+  try {
+    const updatedClass = await Class.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: Date.now() },
+      { new: true, runValidators: true }
+    );
+    if (!updatedClass) return res.status(404).json({ message: 'Classe não encontrada' });
+    res.json(updatedClass);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const deletedClass = await Class.findByIdAndDelete(req.params.id);
+    if (!deletedClass) return res.status(404).json({ message: 'Classe não encontrada' });
+    res.json({ message: 'Classe removida com sucesso' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

@@ -7,7 +7,29 @@ const classSchema = new mongoose.Schema({
     index: true
   },
   description: String,
-  book: String, // livro onde aparece
+  
+  // Pontos de Vida (PV)
+  hp: {
+    initial: String,
+    perLevel: String
+  },
+  
+  // Pontos de Esforço (PE)
+  ep: {
+    initial: String,
+    perLevel: String
+  },
+  
+  // Sanidade (SAN)
+  san: {
+    initial: String,
+    perLevel: String
+  },
+  
+  trainedSkills: String,
+  proficiencies: String,
+  
+  book: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
