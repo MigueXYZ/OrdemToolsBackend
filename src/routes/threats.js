@@ -109,4 +109,17 @@ router.patch('/:id', auth, async (req, res) => {
   }
 });
 
+// Deletar ameaça
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const threat = await Threat.findByIdAndDelete(req.params.id);
+    if (!threat) {
+      return res.status(404).json({ message: 'Threat not found' });
+    }
+    res.json({ message: 'Threat deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
