@@ -8,7 +8,7 @@ const User = require('../models/User');
 // Rota POST para registar um novo utilizador
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, shownName } = req.body; // Adicionado shownName
+    const { username, password, shownName, permissions } = req.body; // Adicionado shownName
 
     // 1. Verificar se o nome de utilizador já existe
     let user = await User.findOne({ username });
