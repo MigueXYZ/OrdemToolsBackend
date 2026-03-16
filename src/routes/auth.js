@@ -103,15 +103,15 @@ router.put('/update-permissions/:id', auth('admin'), async (req, res) => {
   }
 });
 
+
 // ROTA: PUT /api/auth/updatedetails
 // DESC: Atualiza os detalhes do perfil do utilizador (ex: shownName)
-// ACESSO: Privado (requer token)
-router.put('/updatedetails', protect, async (req, res) => {
+// ACESSO: Privado (requer token válido)
+router.put('/updatedetails', auth(), async (req, res) => { // <-- ATENÇÃO AQUI: auth() com parênteses
   try {
     const { shownName } = req.body;
 
-    // Encontra o utilizador pelo ID que vem do token (req.user)
-    // O nome exato de req.user.id ou req.user._id depende do teu middleware
+    // O teu middleware garante que req.user existe (via decoded.user)
     let user = await User.findById(req.user.id);
 
     if (!user) {
@@ -121,15 +121,18 @@ router.put('/updatedetails', protect, async (req, res) => {
     // Atualiza o nome de exibição
     user.shownName = shownName || user.shownName;
 
-    // Guarda na base de dados do MongoDB
+    // Guarda na base de dados
     await user.save();
 
-    // Remove a password antes de enviar de volta para o frontend por segurança
-    user.password = undefined;
-
+    // Devolve os dados limpos
     res.status(200).json({
       success: true,
-      data: user
+      data: {
+        id: user._id,
+        username: user.username,
+        shownName: user.shownName,
+        permissions: user.permissions
+      }
     });
     
   } catch (error) {
