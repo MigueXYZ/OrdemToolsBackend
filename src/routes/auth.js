@@ -103,4 +103,39 @@ router.put('/update-permissions/:id', auth('admin'), async (req, res) => {
   }
 });
 
+// ROTA: PUT /api/auth/updatedetails
+// DESC: Atualiza os detalhes do perfil do utilizador (ex: shownName)
+// ACESSO: Privado (requer token)
+router.put('/updatedetails', protect, async (req, res) => {
+  try {
+    const { shownName } = req.body;
+
+    // Encontra o utilizador pelo ID que vem do token (req.user)
+    // O nome exato de req.user.id ou req.user._id depende do teu middleware
+    let user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilizador não encontrado.' });
+    }
+
+    // Atualiza o nome de exibição
+    user.shownName = shownName || user.shownName;
+
+    // Guarda na base de dados do MongoDB
+    await user.save();
+
+    // Remove a password antes de enviar de volta para o frontend por segurança
+    user.password = undefined;
+
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+    
+  } catch (error) {
+    console.error('Erro ao atualizar detalhes:', error);
+    res.status(500).json({ error: 'Erro no servidor ao atualizar o perfil.' });
+  }
+});
+
 module.exports = router;
