@@ -8,17 +8,23 @@ const User = require('../models/User');
 // Rota POST para registar um novo utilizador
 router.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, shownName } = req.body; // Adicionado shownName
 
-    // Verificar se o nome de utilizador já existe
+    // 1. Verificar se o nome de utilizador já existe
     let user = await User.findOne({ username });
     if (user) {
       return res.status(400).json({ message: 'Este utilizador já existe.' });
     }
 
-    user = new User({ username, password });
+    // 2. Criar instância (a password será encriptada automaticamente se usares o pre-save hook 
+    // ou manualmente como tens abaixo)
+    user = new User({ 
+      username, 
+      password, 
+      shownName: shownName || username // Fallback caso não enviem um nome de exibição
+    });
 
-    // Encriptar a palavra-passe antes de a guardar na base de dados
+    // Encriptação manual (Caso não tenhas o pre-save hook no model)
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
 
@@ -35,30 +41,41 @@ router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Verificar se o utilizador existe
-    const user = await User.findOne({ username });
+    // 1. Verificar se o utilizador existe
+    // NOTA: Precisamos de usar .select('+password') porque no model definimos select: false
+    const user = await User.findOne({ username }).select('+password');
+    
     if (!user) {
       return res.status(400).json({ message: 'Credenciais inválidas.' });
     }
 
-    // Comparar a palavra-passe submetida com a versão encriptada da base de dados
+    // 2. Comparar passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Credenciais inválidas.' });
     }
 
-    // Criar a carga de dados (payload) e assinar o JWT
+    // 3. Criar payload com informações úteis para o Frontend (incluindo permissões)
     const payload = {
-      user: { id: user.id }
+      user: { 
+        id: user.id,
+        permissions: user.permissions 
+      }
     };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }, // Define que o token expira ao fim de 24 horas
+      { expiresIn: '24h' },
       (err, token) => {
         if (err) throw err;
-        res.json({ token, username: user.username });
+        // 4. Devolvemos o shownName para o Header do sistema Aero brilhar
+        res.json({ 
+          token, 
+          username: user.username,
+          shownName: user.shownName,
+          permissions: user.permissions
+        });
       }
     );
   } catch (error) {
