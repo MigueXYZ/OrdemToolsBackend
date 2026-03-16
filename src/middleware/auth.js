@@ -1,26 +1,47 @@
 // middleware/auth.js
 const jwt = require('jsonwebtoken');
 
-module.exports = function(req, res, next) {
-  // Ler o token do cabeçalho do pedido
-  const token = req.header('Authorization');
+/**
+ * Middleware de Autenticação e Autorização
+ * @param {Array|String} requiredPermissions - Permissão ou lista de permissões necessárias
+ */
+const auth = (requiredPermissions = []) => {
+  return (req, res, next) => {
+    // 1. Ler o token do cabeçalho
+    const authHeader = req.header('Authorization');
 
-  // Verificar se não há token
-  if (!token) {
-    return res.status(401).json({ message: 'Acesso negado. Nenhum token fornecido.' });
-  }
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Acesso negado. Nenhum token fornecido.' });
+    }
 
-  try {
-    // O formato padrão do HTTP é enviar "Bearer <token>"
-    const tokenFormatado = token.replace('Bearer ', '');
-    
-    // Verificar a validade e a assinatura do token
-    const decoded = jwt.verify(tokenFormatado, process.env.JWT_SECRET);
-    
-    // Anexar os dados do utilizador ao pedido para uso futuro, se necessário
-    req.user = decoded.user;
-    next(); // Passa a barreira de segurança e avança para a rota principal
-  } catch (err) {
-    res.status(401).json({ message: 'Token inválido ou expirado.' });
-  }
+    try {
+      // 2. Tratar o prefixo Bearer
+      const token = authHeader.replace('Bearer ', '');
+      
+      // 3. Verificar validade
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Anexamos o utilizador ao request
+      req.user = decoded.user;
+
+      // 4. Lógica de Autorização (Permissões)
+      if (requiredPermissions.length > 0) {
+        // Garantimos que trabalhamos sempre com um array para facilitar a comparação
+        const permsNeeded = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
+        
+        // Verificamos se o utilizador tem PELO MENOS UMA das permissões necessárias
+        const hasPermission = req.user.permissions.some(p => permsNeeded.includes(p));
+
+        if (!hasPermission) {
+          return res.status(403).json({ message: 'Acesso interdito. Não tens autorização para esta ação.' });
+        }
+      }
+
+      next();
+    } catch (err) {
+      res.status(401).json({ message: 'Token inválido ou expirado.' });
+    }
+  };
 };
+
+module.exports = auth;

@@ -4,11 +4,12 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middlewares/auth');
 
 // Rota POST para registar um novo utilizador
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, shownName, permissions } = req.body; // Adicionado shownName
+    const { username, password, shownName } = req.body; // Adicionado shownName
 
     // 1. Verificar se o nome de utilizador já existe
     let user = await User.findOne({ username });
@@ -80,6 +81,25 @@ router.post('/login', async (req, res) => {
     );
   } catch (error) {
     res.status(500).json({ message: 'Erro interno no servidor.', error: error.message });
+  }
+});
+
+router.put('/update-permissions/:id', auth('admin'), async (req, res) => {
+  try {
+    const { permissions, shownName } = req.body;
+    
+    // Atualiza o utilizador pelo ID fornecido na URL
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { permissions, shownName } },
+      { new: true } // Devolve o documento já atualizado
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: 'Utilizador não encontrado.' });
+
+    res.json({ message: 'Utilizador atualizado com sucesso!', user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao atualizar.', error: error.message });
   }
 });
 
