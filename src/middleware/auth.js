@@ -29,8 +29,11 @@ const auth = (requiredPermissions = []) => {
         // Garantimos que trabalhamos sempre com um array para facilitar a comparação
         const permsNeeded = Array.isArray(requiredPermissions) ? requiredPermissions : [requiredPermissions];
         
+        // CORREÇÃO: Usar um array vazio como fallback caso req.user.permissions seja undefined em tokens velhos
+        const userPerms = req.user.permissions || [];
+        
         // Verificamos se o utilizador tem PELO MENOS UMA das permissões necessárias
-        const hasPermission = req.user.permissions.some(p => permsNeeded.includes(p));
+        const hasPermission = userPerms.some(p => permsNeeded.includes(p));
 
         if (!hasPermission) {
           return res.status(403).json({ message: 'Acesso interdito. Não tens autorização para esta ação.' });
@@ -39,6 +42,7 @@ const auth = (requiredPermissions = []) => {
 
       next();
     } catch (err) {
+      console.error('Erro no middleware de auth:', err.message); // Facilita o debug no terminal do servidor
       res.status(401).json({ message: 'Token inválido ou expirado.' });
     }
   };
