@@ -141,4 +141,15 @@ router.put('/updatedetails', auth(), async (req, res) => { // <-- ATENÇÃO AQUI
   }
 });
 
+router.get('/users', auth(['admin']), async (req, res) => {
+  try {
+    // Procura todos os utilizadores, mas exclui a password dos resultados
+    const users = await User.find().select('-password');
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Erro ao procurar utilizadores:', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
+  }
+});
+
 module.exports = router;
