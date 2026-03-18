@@ -197,4 +197,38 @@ router.delete('/users/:id', auth(['admin']), async (req, res) => {
   }
 });
 
+// ROTA: PUT /api/auth/change-password
+// DESC: O próprio utilizador altera a sua palavra-passe
+// ACESSO: Privado (requer token válido)
+router.put('/change-password', auth(), async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Precisamos do .select('+password') porque a password está oculta por defeito no model
+    const user = await User.findById(req.user.id).select('+password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilizador não encontrado.' });
+    }
+
+    // 1. Verificar se a palavra-passe atual está correta
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'A palavra-passe atual está incorreta.' });
+    }
+
+    // 2. Encriptar a nova palavra-passe
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+
+    // 3. Guardar na base de dados
+    await user.save();
+
+    res.status(200).json({ message: 'Palavra-passe alterada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao alterar palavra-passe:', error);
+    res.status(500).json({ message: 'Erro interno ao alterar a palavra-passe.' });
+  }
+});
+
 module.exports = router;
