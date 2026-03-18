@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: '2h' }, // <--- MUDA AQUI DE '24h' PARA '2h'
+      { expiresIn: '2h' },
       (err, token) => {
         if (err) throw err;
         res.json({
@@ -149,6 +149,51 @@ router.get('/users', auth(['admin']), async (req, res) => {
   } catch (error) {
     console.error('Erro ao procurar utilizadores:', error);
     res.status(500).json({ message: 'Erro interno no servidor.' });
+  }
+});
+
+// ROTA: PUT /api/auth/users/:id/reset-password
+// DESC: Redefine a palavra-passe de um utilizador gerando uma aleatória
+// ACESSO: Privado (Apenas Admin)
+router.put('/users/:id/reset-password', auth(['admin']), async (req, res) => {
+  try {
+    // Gera uma palavra-passe aleatória de 8 caracteres (letras e números)
+    const tempPassword = Math.random().toString(36).slice(-8);
+    
+    // Encripta a nova palavra-passe
+    const bcrypt = require('bcrypt'); // Garante que tens o bcrypt importado no topo
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+    // Atualiza o utilizador
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id, 
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!updatedUser) return res.status(404).json({ message: 'Utilizador não encontrado.' });
+
+    // Devolvemos a palavra-passe em texto limpo UMA ÚNICA VEZ para o admin copiar
+    res.json({ message: 'Palavra-passe redefinida com sucesso.', tempPassword });
+  } catch (error) {
+    console.error('Erro ao redefinir palavra-passe:', error);
+    res.status(500).json({ message: 'Erro interno ao redefinir palavra-passe.' });
+  }
+});
+
+// ROTA: DELETE /api/auth/users/:id
+// DESC: Apaga um utilizador permanentemente da base de dados
+// ACESSO: Privado (Apenas Admin)
+router.delete('/users/:id', auth(['admin']), async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: 'Utilizador não encontrado.' });
+    
+    res.json({ message: 'Utilizador removido com sucesso do sistema.' });
+  } catch (error) {
+    console.error('Erro ao apagar utilizador:', error);
+    res.status(500).json({ message: 'Erro interno ao apagar conta.' });
   }
 });
 
