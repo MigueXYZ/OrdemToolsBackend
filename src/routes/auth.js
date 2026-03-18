@@ -19,9 +19,9 @@ router.post('/register', async (req, res) => {
 
     // 2. Criar instância (a password será encriptada automaticamente se usares o pre-save hook 
     // ou manualmente como tens abaixo)
-    user = new User({ 
-      username, 
-      password, 
+    user = new User({
+      username,
+      password,
       shownName: shownName || username // Fallback caso não enviem um nome de exibição
     });
 
@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
     // 1. Verificar se o utilizador existe
     // NOTA: Precisamos de usar .select('+password') porque no model definimos select: false
     const user = await User.findOne({ username }).select('+password');
-    
+
     if (!user) {
       return res.status(400).json({ message: 'Credenciais inválidas.' });
     }
@@ -58,26 +58,26 @@ router.post('/login', async (req, res) => {
 
     // 3. Criar payload com informações úteis para o Frontend (incluindo permissões)
     const payload = {
-      user: { 
+      user: {
         id: user.id,
-        permissions: user.permissions 
+        permissions: user.permissions
       }
     };
 
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
-      { expiresIn: '24h' },
+      { expiresIn: '2h' }, // <--- MUDA AQUI DE '24h' PARA '2h'
       (err, token) => {
         if (err) throw err;
-        // 4. Devolvemos o shownName para o Header do sistema Aero brilhar
-        res.json({ 
-          token, 
+        res.json({
+          token,
           username: user.username,
           shownName: user.shownName,
           permissions: user.permissions
         });
       }
+
     );
   } catch (error) {
     res.status(500).json({ message: 'Erro interno no servidor.', error: error.message });
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
 router.put('/update-permissions/:id', auth('admin'), async (req, res) => {
   try {
     const { permissions, shownName } = req.body;
-    
+
     // Atualiza o utilizador pelo ID fornecido na URL
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
@@ -134,7 +134,7 @@ router.put('/updatedetails', auth(), async (req, res) => { // <-- ATENÇÃO AQUI
         permissions: user.permissions
       }
     });
-    
+
   } catch (error) {
     console.error('Erro ao atualizar detalhes:', error);
     res.status(500).json({ error: 'Erro no servidor ao atualizar o perfil.' });
