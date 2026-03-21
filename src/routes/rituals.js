@@ -56,7 +56,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth(), async (req, res) => {
   try {
     const ritual = new Ritual(req.body);
     const saved = await ritual.save();
@@ -66,7 +66,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-router.patch('/:id', auth, async (req, res) => {
+router.patch('/:id', auth(), async (req, res) => {
   try {
     const ritual = await Ritual.findById(req.params.id);
     if (!ritual) return res.status(404).json({ message: 'Not found' });
@@ -79,7 +79,7 @@ router.patch('/:id', auth, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth(), async (req, res) => {
   try {
     await Ritual.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });

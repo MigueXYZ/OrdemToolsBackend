@@ -59,7 +59,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth(), async (req, res) => {
   try {
     const rule = new Rule(req.body);
     const saved = await rule.save();
@@ -69,7 +69,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-router.patch('/:id', auth, async (req, res) => {
+router.patch('/:id', auth(), async (req, res) => {
   try {
     const rule = await Rule.findById(req.params.id);
     if (!rule) return res.status(404).json({ message: 'Not found' });
@@ -82,7 +82,7 @@ router.patch('/:id', auth, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth(), async (req, res) => {
   try {
     await Rule.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });

@@ -85,7 +85,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Criar nova ameaça
-router.post('/', auth, async (req, res) => {
+router.post('/', auth(), async (req, res) => {
   try {
     const newThreat = new Threat(req.body);
     await newThreat.save();
@@ -96,7 +96,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Atualizar ameaça existente
-router.patch('/:id', auth, async (req, res) => {
+router.patch('/:id', auth(), async (req, res) => {
   try {
     req.body.updatedAt = Date.now();
     const threat = await Threat.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -110,7 +110,7 @@ router.patch('/:id', auth, async (req, res) => {
 });
 
 // Deletar ameaça
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth(), async (req, res) => {
   try {
     const threat = await Threat.findByIdAndDelete(req.params.id);
     if (!threat) {

@@ -43,7 +43,7 @@ router.get('/meta', async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth(), async (req, res) => {
   try {
     const newClass = new Class(req.body);
     await newClass.save();
@@ -53,7 +53,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-router.patch('/:id', auth, async (req, res) => {
+router.patch('/:id', auth(), async (req, res) => {
   try {
     const updatedClass = await Class.findByIdAndUpdate(
       req.params.id,
@@ -67,7 +67,7 @@ router.patch('/:id', auth, async (req, res) => {
   }
 });
 
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', auth(), async (req, res) => {
   try {
     const deletedClass = await Class.findByIdAndDelete(req.params.id);
     if (!deletedClass) return res.status(404).json({ message: 'Classe não encontrada' });
