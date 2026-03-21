@@ -21,6 +21,9 @@ const ritualSchema = new mongoose.Schema({
   duration: String,
   tags: [String],
   book: String,
+  execution: { type: String },
+  range: { type: String },
+  target: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
