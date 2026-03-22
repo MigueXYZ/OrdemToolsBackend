@@ -17,7 +17,7 @@ const characterSchema = new mongoose.Schema({
   // Estrutura
   class: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
   track: { type: mongoose.Schema.Types.ObjectId, ref: 'Track' },
-  origin: { type: String }, // Pode ser String ou referência a um modelo "Origin" se criares depois
+  origin: { type: mongoose.Schema.Types.ObjectId, ref: 'Origin' },
 
   // Hierarquia na Ordem
   patente: { type: String, default: 'Recruta' },
