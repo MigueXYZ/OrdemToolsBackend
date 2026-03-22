@@ -13,6 +13,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET: Obter metadados das origens (ex: livros) para os filtros
+router.get('/meta', async (req, res) => {
+  try {
+    // Procura todos os livros diferentes associados a origens na base de dados
+    const books = await Origin.distinct('book');
+    
+    // Devolve os dados (filter tira possíveis resultados nulos)
+    res.status(200).json({ 
+      success: true, 
+      books: books.filter(Boolean),
+      tags: [] // As origens por agora não têm tags, mas mandamos vazio para o Frontend não dar erro
+    });
+  } catch (error) {
+    console.error('Erro ao obter metadados das origens:', error);
+    res.status(500).json({ success: false, error: 'Erro no servidor' });
+  }
+});
+
 // GET: Obter uma Origem específica por ID
 router.get('/:id', async (req, res) => {
   try {
