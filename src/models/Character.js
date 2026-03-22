@@ -56,10 +56,11 @@ const characterSchema = new mongoose.Schema({
   }],
   
   // Ataques / Armas Rápidas
+// Ataques / Armas Rápidas
   attacks: [{
     weapon: { type: mongoose.Schema.Types.ObjectId, ref: 'Weapon' },
     customName: { type: String },
-    attackBonus: { type: Number, default: 0 },
+    attackBonus: { type: String }, 
     damageOverride: { type: String },
     criticalOverride: { type: String }
   }],
