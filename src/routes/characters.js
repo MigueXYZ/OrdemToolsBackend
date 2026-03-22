@@ -11,6 +11,7 @@ router.get('/', auth(), async (req, res) => {
     const characters = await Character.find({ user: req.user.id })
       .populate('class', 'name')
       .populate('track', 'name')
+      .populate('origin', 'name')
       .sort({ updatedAt: -1 }); // Mais recentes primeiro
 
     res.json(characters);
