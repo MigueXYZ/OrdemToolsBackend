@@ -5,8 +5,8 @@ const originSchema = new mongoose.Schema({
   description: { type: String },
   powerName: { type: String, required: true },
   powerDescription: { type: String, required: true },
-  // Se quiseres, podes até adicionar as perícias que a origem dá:
-   trainedSkills: [{ type: String }] 
+  trainedSkills: [{ type: String }],
+  book: { type: String }, // Para saber de onde veio a origem (se for do livro base, do suplemento, etc.)
 }, { timestamps: true });
 
 module.exports = mongoose.model('Origin', originSchema);
