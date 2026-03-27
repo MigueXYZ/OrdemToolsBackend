@@ -93,6 +93,13 @@ const threatSchema = new mongoose.Schema({
     description: String,
     mechanics: String
   },
+
+  disturbingPresence: {
+    hasDisturbingPresence: { type: Boolean, default: false },
+    dt: Number,
+    damage: String,
+    immunityNex: Number
+  },
   
   book: String,
   createdAt: { type: Date, default: Date.now },
