@@ -48,7 +48,7 @@ router.get('/meta', async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+router.post('/', auth(), async (req, res) => {
   try {
     const newTrack = new Track(req.body);
     await newTrack.save();
